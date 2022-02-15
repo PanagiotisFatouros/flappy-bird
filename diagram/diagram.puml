@@ -1,0 +1,158 @@
+@startuml project2A
+title ShadowFlap Game Design
+skinparam ClassAttributeIconSize 0
+ShadowFlap *-->"1"Bird: "has"
+ShadowFlap *-->"1"Weapons: "has"
+ShadowFlap *-->"1"LifeBar: "has"
+ShadowFlap *-->"1"Pipes: "has"
+Weapons o-->"0..*"Weapon: "contains"
+Pipes o-->"0..*"Pipe: "contains"
+
+abstract class AbstractGame
+
+class ShadowFlap extends AbstractGame {
+    -{static}windowLength: int = 1024;
+    -{static}windowHeight:int = 768;
+    -{static}ScoreVerticalAdjustment:int = 75;
+    -{static}countFrames:int = 0;
+    -{static}level:int;
+    -{static}displayLevelUp:boolean = false;
+    -{static}timescale:int = 1;
+    -{static}score:int = 0;
+    -{static}distanceSinceLastPipe:int;
+    -gravity:double = 0.4;
+    -speedWhileFlying:double = -6;
+    -fontSize:int = 48;
+    -scoreEndsLevel0:int = 10;
+    -scoreEndsLevel1:int = 30;
+    -background: Image;
+    -font:Font;
+    -String startMessage: String = "PRESS SPACE TO START";
+    -inGame:boolean = false;
+    -finishedGame:boolean = false;
+    -collision:boolean = false;
+    +{static}main(args: String[]): void
+    +incrementScore(): void
+    -printMessageCentered(message: String, leftX: double, bottomY: double): void
+    +update(input: Input): void
+}
+
+class Pipe extends Component {
+    -{static} startSpeed: double = -3;
+    -{static}{field}startVelocity: Vector2 = new Vector2(1, 0);
+    -{static}startXPosition:int = 1024;
+    -{static}offset: int = 168;
+    -{static}rotation: double = Math.PI;
+    -startPosition: Vector2;
+    -isSteel: boolean;
+    -passed: boolean = false;
+    -levelZeroPositions: int[] = {184, 384, 584};
+    -pipe: Image;
+    -flames: Image; 
+    -drawing: DrawOptions;
+    -rectangles[]: Rectangle;
+    +isSteel(): boolean
+    +isPassed(): boolean
+    +pass(): void
+    +die(respawn: boolean): void
+    +getTopRightCornerBottomRectangle(): Point
+    +getPipesRectangles(): Rectangle[]
+    +getFlameRectangles(): Rectangle[]
+    +draw(): void
+}
+abstract class Weapon {
+    -{static}startVelocity: Vector2 = Vector2(1, 0)
+    -{static}startSpeed: double = -3
+    -{static}shotSpeed: double = 5
+    -pickedUp: boolean = false
+    -image: Image
+    -shootingRange: int
+    -distanceTraveled: double
+    -isShot: boolean
+    -targetsMetal: boolean
+    +isShot(): void
+    +pickUp(newVelocity: Vector2, speed: double): void
+    +die(respawn: boolean): void
+    +draw(): void
+    +draw(p: Point): void
+    +shoot(): void
+    +getWeaponRectangle(): Rectangle
+    +hitPipe(pipe: Pipes): boolean
+    +destroyedPipe(pipe: Pipes): boolean 
+}
+abstract class Components<T extends Component> {
+    -Objects: ArrayList<T>
+    -toRemove: ArrayList<T>
+    -image1: Image
+    -image2: Image
+    +accelerate(): void
+    +addToRemove(object: T): void
+    +changeTimescale(rate: double): void
+    +draw(): void
+    +move(): void
+    +removeRequired(): void
+    +removeObject(object: T): void
+    +removeAllObjects(): void
+    +{abstract} spawnObjects(): void
+}
+abstract class Component {
+    -position:Vector2 
+    -velocity:Vector2 
+    -speed:double 
+    +accelerate():void
+    +{abstract} draw(): void
+    -{abstract} die(respawn: boolean): void
+    +move():void
+}
+class Pipes<Pipe> Extends Components {
+    +spawnObjects(): void
+    +getPipesRectangles(): ArrayList<Rectangle[]>
+    +getFlameRectangles(): ArrayList<Rectangle[]>
+}
+class Weapons<Weapon> Extends Components {
+    +destroyedPipe(pipes: Pipes): void
+    +spawnObjects(): void
+    +getWeaponsRectangles(): ArrayList<Rectangle>
+    +move(): void
+}
+class LifeBar {
+    -{static} numLivesLevel0: int = 3
+    -{static} numLivesLevel0: int = 6
+    -numLives: int
+    -totalHearts: int
+    -fullHeart: Image
+    -emptyHeart: Image
+    +getNumLives(): int
+    +changeToLevel1(): void
+    +die(): void
+    +draw(): void
+}
+class Rock extends Weapon {
+    -{static} shootingRange: int = 25
+    -{static} targetsMetal: boolean = false
+}
+class Bomb extends Weapon {
+    -{static} shootingRange: int = 50
+    -{static} targetsMetal: boolean = true
+}
+class Bird extends Component {
+    -{static}maxSpeed:double = 10
+    -{field}{static} startPosition: Vector2 = Vector2(200, 350)
+    -{field}{static} startVelocity: Vector2 = Vector2(0, 1)
+    -{static} startSpeed: int = 0
+    -wingsUpImage: Image
+    -wingsDownImage: Image
+    -rectangle: Rectangle
+    +die(): void
+    +respawn(): void
+    +getWeapon(): Weapon
+    +draw(): void
+    +outOfBounds(): boolean
+    +shoot(): void
+    +hasCollided(pipes: Pipes): boolean
+    +getBirdRectangle(): Rectangle
+    +pickUpWeapon(weapons: Weapons):
+    +passedPipes(pipes: Pipes): boolean
+}
+
+@enduml
